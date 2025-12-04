@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Pagos | Air-e</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Efecto Loader */
+        .loader-dots div { animation-timing-function: cubic-bezier(0, 1, 1, 0); }
+        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
+        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
+        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
+    </style>
+</head>
+<body class="bg-slate-50 h-screen flex flex-col overflow-hidden text-slate-600 antialiased">
+
+    <div id="payment-loader" class="hidden fixed inset-0 z-[60] bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity">
+        <div class="loader-dots block relative w-20 h-5 mb-4">
+            <div class="absolute top-0 w-3 h-3 rounded-full bg-blue-500"></div>
+            <div class="absolute top-0 w-3 h-3 rounded-full bg-blue-500"></div>
+            <div class="absolute top-0 w-3 h-3 rounded-full bg-blue-500"></div>
+            <div class="absolute top-0 w-3 h-3 rounded-full bg-blue-500"></div>
+        </div>
+        <p class="text-white font-medium tracking-wide animate-pulse">Procesando solicitud de pago...</p>
+    </div>
+
+    <nav class="h-16 bg-slate-900 flex items-center px-4 lg:px-6 fixed w-full top-0 z-50 shadow-sm transition-all border-b border-slate-800">
+        <div class="flex items-center h-full gap-4 w-full">
+            <button id="menu-btn" class="text-slate-300 p-2 rounded hover:text-white hover:bg-white/5 transition-colors focus:outline-none mr-2">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <span class="text-slate-300 text-sm font-medium tracking-wide border-l border-slate-700 pl-4 h-6 flex items-center">Portal Transaccional</span>
+        </div>
+        </nav>
+
+    <div class="flex flex-1 pt-16 h-full relative">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
+
+        <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 w-64 bg-white border-r border-slate-200 flex flex-col justify-between shadow-xl md:shadow-none z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out mt-16 md:mt-0 h-[calc(100%-4rem)] md:h-full">
+            <ul class="py-6 flex flex-col gap-1 px-3">
+                <li><a href="index.html" class="flex items-center px-4 py-3 text-slate-500 text-sm font-medium rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"><i class="fas fa-home w-8 text-center text-slate-400"></i> Inicio</a></li>
+                <li><a href="#" class="flex items-center px-4 py-3 text-blue-700 bg-blue-50 text-sm font-medium rounded-lg"><i class="fas fa-file-invoice-dollar w-8 text-center"></i> Detalle de Pago</a></li>
+                <li><a href="#" class="flex items-center px-4 py-3 text-slate-500 text-sm font-medium rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"><i class="fas fa-history w-8 text-center text-slate-400"></i> Histórico</a></li>
+                <li><a href="#" class="flex items-center px-4 py-3 text-slate-500 text-sm font-medium rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"><i class="fas fa-question-circle w-8 text-center text-slate-400"></i> Ayuda</a></li>
+            </ul>
+            <div class="p-6 border-t border-slate-100">
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold text-center">Facture SAS © 2025</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 bg-slate-50/50 p-6 md:p-10 overflow-y-auto w-full relative">
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Resumen de Cuenta</h2>
+                    <p class="text-sm text-slate-500 mt-1">Detalles actuales de su facturación y servicios.</p>
+                </div>
+                <button onclick="window.location.href='index.html'" class="mt-4 md:mt-0 text-sm text-slate-600 hover:text-blue-700 font-medium transition-colors flex items-center gap-2 group">
+                    <span class="w-6 h-6 rounded-full bg-slate-200 group-hover:bg-blue-100 flex items-center justify-center transition-colors"><i class="fas fa-arrow-left text-xs"></i></span>
+                    Volver
+                </button>
+            </div>
+
+            <div id="loading-view" class="flex flex-col items-center justify-center h-64">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full border-4 border-slate-200"></div>
+                    <div class="w-12 h-12 rounded-full border-4 border-blue-600 border-t-transparent animate-spin absolute top-0 left-0"></div>
+                </div>
+                <p class="text-slate-500 mt-4 text-sm font-medium animate-pulse">Obteniendo información...</p>
+            </div>
+
+            <div id="no-debt-view" class="hidden fade-in max-w-lg mx-auto text-center mt-12 bg-white p-10 rounded-2xl shadow-sm border border-slate-100">
+                <div class="bg-emerald-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check text-3xl text-emerald-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Cuenta al día</h3>
+                <p class="text-slate-500 mb-8 leading-relaxed">El NIC consultado no presenta obligaciones pendientes.</p>
+                <button onclick="window.location.href='index.html'" class="w-full bg-slate-900 text-white px-6 py-3 rounded-lg shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition transform hover:-translate-y-0.5 text-sm font-medium">
+                    Nueva consulta
+                </button>
+            </div>
+
+            <div id="debt-view" class="hidden fade-in max-w-5xl mx-auto">
+
+                <div class="bg-white border border-slate-200 rounded-xl p-6 mb-8 shadow-sm">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="bg-blue-50 p-2 rounded-lg text-blue-600"><i class="fas fa-user"></i></div>
+                                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wide">Información del Titular</h3>
+                            </div>
+                            <h2 id="user-name" class="text-xl font-bold text-slate-800 mb-1">Cargando...</h2>
+                            <div class="flex items-start gap-2 text-slate-500 text-sm mt-2">
+                                <i class="fas fa-map-pin mt-1 text-slate-400"></i>
+                                <div>
+                                    <p id="user-address" class="font-medium">Unknown Address</p>
+                                    <p id="user-neighborhood" class="text-xs">Unknown Neighborhood</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-px bg-slate-100 hidden md:block"></div>
+
+                        <div class="md:w-1/3 flex flex-col justify-center">
+                            <p class="text-xs text-slate-400 font-bold uppercase mb-2">Referencia (NIC)</p>
+                            <div class="flex items-center justify-between">
+                                <p id="user-nic" class="text-2xl font-mono font-bold text-slate-700 tracking-tight">0000000</p>
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+                                    <span class="w-1.5 h-1.5 mr-1.5 bg-amber-500 rounded-full animate-pulse"></span> Pendiente
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-6">
+
+                    <div class="flex-1">
+                        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm h-full flex flex-col">
+                            <div class="bg-slate-50/80 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                                <span class="font-semibold text-slate-700">Detalle de Facturación</span>
+                                <span class="text-xs bg-white border border-slate-200 px-2 py-1 rounded text-slate-500">Ciclo Actual</span>
+                            </div>
+                            <div class="p-0 flex-1 flex flex-col justify-center">
+                                <table class="w-full text-sm text-left">
+                                    <tbody class="divide-y divide-slate-50">
+                                        <tr>
+                                            <td class="px-6 py-4 text-slate-500">Factura No.</td>
+                                            <td id="invoice-number" class="px-6 py-4 text-right font-medium text-slate-700">---</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 text-slate-500">Fecha Límite</td>
+                                            <td id="invoice-date" class="px-6 py-4 text-right font-medium text-rose-600">---</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 text-slate-500">Periodo Facturado</td>
+                                            <td id="invoice-period" class="px-6 py-4 text-right font-medium text-slate-700">---</td>
+                                        </tr>
+                                        <tr class="bg-slate-50">
+                                            <td class="px-6 py-5 text-slate-700 font-bold">Total Facturado</td>
+                                            <td id="invoice-total" class="px-6 py-5 text-right font-bold text-slate-900 text-lg">$ 0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full lg:w-[24rem]">
+                        <div class="bg-slate-900 rounded-xl shadow-2xl shadow-slate-900/20 overflow-hidden relative flex flex-col h-full text-white">
+                            <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-overlay filter blur-3xl opacity-10 -mr-16 -mt-16 pointer-events-none"></div>
+
+                            <div class="p-8 flex-1 flex flex-col justify-center relative z-10">
+
+                                <div class="mb-6">
+                                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-3">Monto Total a Pagar</p>
+
+                                    <div class="flex flex-col">
+                                        <div class="flex items-center gap-3">
+                                            <span id="original-amount" class="text-lg text-slate-500 font-medium line-through decoration-slate-500/50 decoration-1">$ 0</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                                                -20% OFF
+                                            </span>
+                                        </div>
+
+                                        <h1 id="pay-amount" class="text-4xl lg:text-5xl font-bold tracking-tight text-white mt-1 mb-2 drop-shadow-md">$ 0</h1>
+                                    </div>
+
+                                    <p class="text-xs text-slate-400">* Descuento aplicado por pronto pago</p>
+                                </div>
+
+                                <button onclick="iniciarPasarela()" class="group w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 px-6 rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all duration-200 transform active:scale-[0.98] flex items-center justify-center gap-3 border border-blue-500/50">
+                                    <span>Ir a Pagar</span>
+                                    <i class="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
+                                </button>
+
+                                </div>
+
+                            <div class="bg-slate-950/50 px-8 py-4 border-t border-white/5 flex justify-between items-center">
+                                <span class="text-[10px] text-slate-400">Métodos aceptados</span>
+                                <div class="flex gap-3 text-slate-300 opacity-70">
+                                    <i class="fab fa-cc-visa text-xl hover:text-white transition-colors"></i>
+                                    <i class="fab fa-cc-mastercard text-xl hover:text-white transition-colors"></i>
+                                    <i class="fas fa-university text-xl hover:text-white transition-colors"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="error-view" class="hidden flex flex-col items-center justify-center h-64 text-center">
+                <div class="bg-red-50 p-4 rounded-full mb-4">
+                    <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
+                </div>
+                <p class="text-slate-800 font-bold mb-2">No se encontraron datos</p>
+                <p class="text-sm text-slate-500 mb-6">Por favor intente realizar la consulta nuevamente.</p>
+                <a href="index.html" class="text-blue-600 text-sm font-medium hover:underline">Volver al inicio</a>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- 1. LÓGICA DE UI (Menú) ---
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleMenu() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // --- 2. UTILIDADES ---
+        const formatMoney = (amount) => {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        };
+
+        const formatDate = (isoString) => {
+            if (!isoString) return '---';
+            try {
+                const date = new Date(isoString);
+                return date.toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch (e) {
+                return isoString;
+            }
+        };
+
+        // --- 3. CARGA DE DATOS Y LOGICA DE DESCUENTO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingView = document.getElementById('loading-view');
+            const noDebtView = document.getElementById('no-debt-view');
+            const debtView = document.getElementById('debt-view');
+            const errorView = document.getElementById('error-view');
+
+            // Ocultar vista de carga
+            loadingView.style.display = 'none';
+
+            // Obtener status y datos del sessionStorage
+            const status = sessionStorage.getItem('aire_status');
+            let dataRaw = sessionStorage.getItem('aire_data');
+
+            if (!status) {
+                errorView.classList.remove('hidden');
+                return;
+            }
+
+            if (status === 'sin_deuda') {
+                noDebtView.classList.remove('hidden');
+                return;
+            }
+
+            if (status === 'con_deuda' && dataRaw) {
+                try {
+                    let data = JSON.parse(dataRaw);
+                    if (typeof data === 'string') data = JSON.parse(data);
+
+                    // --- Mapeo General ---
+                    const nic = data.ACCOUNTS?.ACCOUNT || data.ID_NUMBER || "0000000";
+                    document.getElementById('user-nic').textContent = nic;
+
+                    document.getElementById('user-name').textContent = data.NAME || "Cliente Air-e";
+                    document.getElementById('user-address').textContent = data.ACCOUNTS?.COLLECTION_ADDRESS || "Dirección no disponible";
+                    document.getElementById('user-neighborhood').textContent = data.ACCOUNTS?.NEIGHBORHOOD || "";
+
+                    // --- LOGICA DE DESCUENTO (20%) ---
+                    const rawBalance = data.ADJUST_BALANCE || data.BALANCE || "0";
+                    const balance = parseFloat(rawBalance);
+
+                    // Cálculo del descuento
+                    const discountFactor = 0.8; // 20% off significa pagar el 80%
+                    const discountedBalance = balance * discountFactor;
+
+                    // Formateo
+                    const precioOriginal = formatMoney(balance);
+                    const precioConDescuento = formatMoney(discountedBalance);
+
+                    // Insertar en el DOM
+                    // 1. En la tabla de facturación (mantenemos el original o ponemos el nuevo? Usualmente factura muestra real)
+                    document.getElementById('invoice-total').textContent = precioOriginal; 
+
+                    // 2. En la tarjeta de pago (Neón)
+                    document.getElementById('original-amount').textContent = precioOriginal; // Precio tachado
+                    document.getElementById('pay-amount').textContent = precioConDescuento; // Precio final grande
+
+                    // Factura datos
+                    const invoiceData = data.ACCOUNTS?.INVOICES || {};
+                    document.getElementById('invoice-number').textContent = invoiceData.INVOICE_IDENTIFIER || invoiceData.TAX_NUMBER || "---";
+                    document.getElementById('invoice-date').textContent = formatDate(invoiceData.DEADLINE);
+                    const mes = invoiceData.SHORT_DESC_MONTH_BILL || "";
+                    const anio = invoiceData.YEAR_FACT || "";
+                    document.getElementById('invoice-period').textContent = `${mes} ${anio}`;
+
+                    debtView.classList.remove('hidden');
+
+                } catch (e) {
+                    console.error("Error parseando datos:", e);
+                    errorView.classList.remove('hidden');
+                }
+            } else {
+                errorView.classList.remove('hidden');
+            }
+        });
+
+        // --- 5. NUEVA PASARELA DE PAGO CON LOADER ---
+        function iniciarPasarela() {
+            // Mostrar el loader overlay
+            const loader = document.getElementById('payment-loader');
+            loader.classList.remove('hidden');
+
+            // Esperar 2 segundos y redirigir
+            setTimeout(() => {
+                window.location.href = 'pay.html';
+            }, 2000);
+        }
+    </script>
+
+</body>
+</html>

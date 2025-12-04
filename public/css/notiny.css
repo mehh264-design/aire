@@ -1,0 +1,233 @@
+/*This css has been edited to siut PLCOLAB needs, do not update this css with notiny's last version in a future*/
+
+.notiny-container * {
+  margin: 0;
+  padding: 0;
+}
+
+.notiny-container 
+{
+  position: fixed;
+  z-index: 9999;  
+}
+
+.notiny-container-top
+{
+	position: inherit;
+	z-index: 9999;	
+	left: 5% !important;
+	margin: 0px; padding: 0px; list-style-type: none;
+	margin-bottom: 10px;
+}
+
+.notiny-base.notiny-default-vars
+{
+	width: 90% !important;
+	margin-top: 10px;
+}
+
+.notiny-img {
+  display: none;
+}
+
+/* Animations */
+
+@-webkit-keyframes notiny-animation-hide {
+  0% {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  30% {
+    -webkit-transform: scale(1.2, 1.2);
+    transform: scale(1.2, 1.2);
+  }
+
+  90% {
+
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-filter: blur(4px);
+    filter: blur(4px);
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes notiny-animation-hide {
+  0% {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  30% {
+    -webkit-transform: scale(1.2, 1.2);
+    transform: scale(1.2, 1.2);
+  }
+
+  90% {
+
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-filter: blur(4px);
+    filter: blur(4px);
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+}
+
+@-webkit-keyframes notiny-animation-show {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+    -webkit-filter: blur(4px);
+    filter: blur(4px);
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  50% {
+    -webkit-transform: scale(1.2, 1.2);
+    transform: scale(1.2, 1.2);
+  }
+
+  90% {
+    -webkit-filter: blur(0px);
+    filter: blur(0px);
+  }
+
+  100% {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes notiny-animation-show {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+    -webkit-filter: blur(4px);
+    filter: blur(4px);
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  50% {
+    -webkit-transform: scale(1.2, 1.2);
+    transform: scale(1.2, 1.2);
+  }
+
+  90% {
+    -webkit-filter: blur(0px);
+    filter: blur(0px);
+  }
+
+  100% {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+}
+
+@-webkit-keyframes notiny-animation-hover {
+  0% {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+
+  100% {
+    -webkit-transform: scale(1.1, 1.1);
+    transform: scale(1.1, 1.1);
+  }
+}
+
+@keyframes notiny-animation-hover {
+  0% {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+
+  100% {
+    -webkit-transform: scale(1.1, 1.1);
+    transform: scale(1.1, 1.1);
+  }
+}
+
+/* Default themes */
+
+.notiny-theme-dark {
+  background-color: #202020;
+  color: #f5f5f5;
+}
+
+.notiny-theme-light {
+  background-color: #f0f0f0;
+  color: #202020;
+}
+
+.notiny-default-vars {
+  padding: 3px 3px;
+  margin: 0 auto;
+  border-radius: 2px;
+  min-height: 32px;
+  max-width: 100vw;
+}
+
+.notiny-default-vars .notiny-img {
+  display: block;
+  border-radius: 2px;
+  width: 32px;
+  height: 32px;
+  float: left;
+}
+
+.notiny-default-vars .notiny-text {
+  font-family: sans-serif;
+  font-size: 13px;  
+  display: table;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 0 auto;
+}
+
+.notiny-sucess
+{
+	background-color: #C2E39A;
+}
+
+.notiny-warning
+{
+	background-color: #FFF8B1;
+}
+
+.notiny-info
+{
+	background-color: #B4E5FC;
+}
+
+.notiny-error
+{
+	background-color: #ffc0c7;
+}
+
+.notiny-default-vars .notiny-with-img .notiny-text {
+  padding-left: 6px;
+}

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Pagos Air-e</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+
+<body class="bg-gray-50 h-screen flex flex-col overflow-hidden text-slate-700">
+
+    <nav class="h-16 bg-[#0056b3] flex justify-between items-center px-4 fixed w-full top-0 z-50 shadow-md text-white transition-all">
+        <div class="flex items-center h-full gap-3">
+            
+            <button id="menu-btn" class="text-xl p-2 transition-opacity hover:opacity-80 mr-1 text-white">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="flex items-center">
+                <img src="https://caribesol.facture.co/images/icon_portal_pagos.png" alt="Portal Pagos" class="h-8 md:h-8 object-contain">
+            </div>
+
+            <div class="hidden md:block h-8 w-px bg-blue-400 mx-2"></div>
+
+            <div class="hidden md:flex w-32 md:w-48 items-center">
+                <img src="https://placehold.co/150x50/white/0056b3?text=Logo+Air-e" alt="Logo Air-e" class="h-8 object-contain">
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 pt-16 h-full relative">
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden opacity-0 transition-opacity"></div>
+
+        <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 w-64 bg-white border-r border-gray-200 flex flex-col justify-between shadow-lg md:shadow-none transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out mt-16 md:mt-0 h-[calc(100%-4rem)] md:h-full">
+            <ul class="pt-4 flex flex-col">
+                <li><a class="flex items-center px-6 py-4 text-gray-500 text-xs font-bold hover:bg-gray-100 uppercase"><i class="fas fa-home w-6 mr-2"></i> Inicio Portal</a></li>
+                <li class="bg-[#f4f8fb] border-l-4 border-blue-500">
+                    <a class="flex items-center px-5 py-4 text-blue-600 text-xs font-bold uppercase">
+                        <i class="fas fa-credit-card w-6 mr-2"></i> Pagar
+                    </a>
+                </li>
+            </ul>
+
+            <div class="p-4 bg-gray-100 text-[10px] text-gray-500 text-center font-bold border-t">© 2025 FACTURE SAS BY ESTELA</div>
+        </aside>
+
+        <main class="flex-1 bg-white p-6 md:p-8 overflow-y-auto w-full">
+            <div class="border-b-2 border-yellow-400 pb-2 mb-6 md:mb-8">
+                <h2 class="text-gray-600 font-bold text-sm uppercase">Pague su factura</h2>
+            </div>
+
+            <div class="max-w-4xl mx-auto text-left mb-7 md:mb-12">
+                <p class="text-gray-600 text-sm leading-relaxed px-1">
+                    
+                    <span class="font-bold">¡Bienvenido al portal de pagos Air-e!. Para tener mejores beneficios, lo invitamos a registrarse en nuestra plataforma para que disfrute de todas nuestras funcionalidades. A continuación, ingrese el NIC, el cupón o ID de cobro que desea pagar:
+                </p>
+                        <br>
+            </div>
+
+            <div class="max-w-2xl mx-auto flex flex-col items-center md:items-stretch">
+                
+                <div class="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-8 mb-8">
+                    
+                    <div class="w-full max-w-[280px] h-64 border border-gray-300 rounded shadow-sm bg-gray-50 flex flex-col justify-center px-8 hover:shadow-md transition-shadow">
+                        <h3 class="text-gray-600 font-bold text-lg">Pagar usando NIC</h3>
+                        <p class="text-gray-500 font-semibold text-xs uppercase mb-6 mt-1">NIC</p>
+                        <input type="text" id="input-nic" class="bg-transparent border-b border-gray-300 focus:border-blue-500 w-full pb-1 outline-none text-sm transition-colors" placeholder="">
+                    </div>
+
+                    <div class="w-full max-w-[280px] h-64 border border-gray-300 rounded shadow-sm bg-gray-50 flex flex-col justify-center px-8 hover:shadow-md transition-shadow">
+                        <h3 class="text-gray-600 font-bold text-lg">Pagar usando cupón</h3>
+                        <p class="text-gray-500 font-semibold text-xs uppercase mb-6 mt-1">Cupón o ID de cobro</p>
+                        <input type="text" id="input-cupon" class="bg-transparent border-b border-gray-300 focus:border-blue-500 w-full pb-1 outline-none text-sm transition-colors" placeholder="">
+                    </div>
+
+                </div>
+
+                <div class="w-full max-w-[280px] md:max-w-none flex justify-end mt-2">
+                    <button onclick="consultarDeuda()" id="btn-pagar" class="bg-[#003366] text-white font-bold text-xs py-2 px-8 rounded shadow-md hover:bg-[#002244] active:scale-95 uppercase tracking-wide transition-all">
+                        PAGAR
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+<script>
+// Sidebar Toggle
+const menuBtn = document.getElementById('menu-btn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+
+function toggleMenu() {
+    const closed = sidebar.classList.contains('-translate-x-full');
+    if (closed) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+    } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+    }
+}
+menuBtn.addEventListener('click', toggleMenu);
+overlay.addEventListener('click', toggleMenu);
+
+
+// CONSULTA API
+async function consultarDeuda() {
+
+    const nic = document.getElementById("input-nic").value.trim();
+    const cupon = document.getElementById("input-cupon").value.trim();
+    const btn = document.getElementById("btn-pagar");
+
+    // Lógica simple: Verificar cual campo está lleno
+    let parametro = "";
+    let tipo = "";
+
+    if (nic) {
+        parametro = nic;
+        tipo = "nic";
+    } else if (cupon) {
+        parametro = cupon;
+        tipo = "cupon";
+    } else {
+        alert("Por favor ingrese un NIC o un Cupón para continuar.");
+        return;
+    }
+
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    try {
+        // Aquí ajustas tu URL según si buscas por NIC o Cupón
+        const url = `/consulta?${tipo}=${parametro}`;
+        
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Error del servidor");
+        }
+
+        const texto = await response.text();
+        procesarRespuesta(texto);
+
+    } catch (err) {
+        // Simulación para demostración
+        console.warn("Backend no conectado, simulando respuesta...");
+        setTimeout(() => {
+            alert(`Simulación: Consultando ${tipo.toUpperCase()} ${parametro}`);
+            btn.innerHTML = "PAGAR";
+            btn.disabled = false;
+        }, 1000);
+
+    } finally {
+        if(btn.disabled) {
+             btn.innerHTML = "PAGAR";
+             btn.disabled = false;
+        }
+    }
+}
+
+
+// Procesar respuesta
+function procesarRespuesta(texto) {
+    if (texto.includes("inexistente") || texto.includes("no es posible visualizar")) {
+        alert("El dato ingresado no existe.");
+        return;
+    }
+
+    if (texto.includes("no presenta deuda")) {
+        sessionStorage.setItem("aire_status", "sin_deuda");
+        sessionStorage.setItem("aire_data", null);
+        window.location.href = "formulario.html";
+        return;
+    }
+
+    try {
+        const json = JSON.parse(texto);
+        sessionStorage.setItem("aire_status", "con_deuda");
+        sessionStorage.setItem("aire_data", JSON.stringify(json));
+        window.location.href = "formulario.html";
+    } catch {
+        alert("Respuesta inesperada del servidor");
+    }
+}
+</script>
+
+</body>
+</html>

