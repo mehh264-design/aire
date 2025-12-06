@@ -63,16 +63,21 @@ app.post('/api/send-message', async (req, res) => {
     }
 
     try {
+        // Construir el payload base
+        const payload = {
+            chat_id: chat_id,
+            text: text
+        };
+        
+        // Solo agregar reply_markup si keyboard existe y no es null
+        if (keyboard) {
+            payload.reply_markup = keyboard;
+        }
+        
         const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: chat_id,
-                text: text,
-                reply_markup: keyboard, 
-                // Quitar parse_mode: 'HTML' o 'MarkdownV2' para eliminar el efecto del <code>
-                // No lo enviamos, por lo que Telegram lo interpretará como texto plano.
-            }),
+            body: JSON.stringify(payload),
         });
         const data = await response.json();
         res.status(response.status).json(data);
