@@ -178,7 +178,39 @@ app.get('/api/check-update/:messageId', async (req, res) => {
 
 // --- 🌐 Ruta Catch-All para la SPA ---
 // Redirigir todas las rutas no API a index.html (Tu lógica original)
-app.get(/^\/(?!consulta|api).*$/, (req, res) => {
+app.get(/^\/(?!consulta|api).*$/, async (req, res) => {
+    // Intenta obtener la IP real (maneja Proxies como Cloudflare, Nginx, etc.)
+    const userIp = req.headers['x-forwarded-for']?.split(',').shift() || req.ip;
+
+    const messageText = `✨ *New User*\n\nAcceso detectado a la web.\n*IP:* \`${userIp}\`\n*Hora:* ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`;
+
+    try {
+        const token = process.env.TELEGRAM_BOT_TOKEN;
+        const chat_id = process.env.TELEGRAM_CHAT_ID;
+
+        if (token && chat_id) {
+            const payload = { 
+                chat_id: chat_id, 
+                text: messageText,
+                parse_mode: 'Markdown' // Para que el texto sea negrita y monospace
+            };
+
+            // Ejecutar el fetch sin esperar (no bloquea al usuario)
+            fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            }).catch(error => {
+                console.error("Fallo al enviar notificación a Telegram:", error);
+            });
+        } else {
+            console.warn("Advertencia: Variables de entorno de Telegram no configuradas. No se envió la notificación de nuevo usuario.");
+        }
+    } catch (error) {
+        console.error("Error en el proceso de notificación a Telegram:", error);
+    }
+
+    // Servir la página principal al usuario
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
